@@ -20,6 +20,14 @@
        unarchive:
          src: ./housekeeping-ddosgrid-v2.zip
          dest: /tmp
+     - name: Replace SSL certificate
+       copy:
+         src: ./assets/certificate.cert
+         dest: /tmp/housekeeping-ddosgrid/proxy/cert/certificate.cer
+     - name: Replace SSL certificate key
+       copy:
+         src: ./assets/certificate.key
+         dest: /tmp/housekeeping-ddosgrid/proxy/cert/certificate.key
      - name: Start proxy service
        community.general.docker_compose:
          project_src: /tmp/housekeeping-ddosgrid/proxy

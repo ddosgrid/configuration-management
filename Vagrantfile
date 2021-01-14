@@ -9,6 +9,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 443, host: 443, guest_ip: "10.0.1.2"
   config.vm.network "private_network", ip: "10.0.1.2"
 
+  config.vm.define "ddosgrid-v2"
 #  config.vm.network "public_network", ip: "192.168.88.212"
   config.vm.provider :virtualbox do |vb|
   #   # Don't boot with headless mode
@@ -16,6 +17,7 @@ Vagrant.configure(2) do |config|
   #
   #   # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2"]
+    vb.name = "ddosgrid-v2"
   end
 
   # Disable the new default behavior introduced in Vagrant 1.7, to
