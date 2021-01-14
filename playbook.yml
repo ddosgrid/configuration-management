@@ -15,18 +15,17 @@
        ansible.builtin.debug:
         msg: 'Deploying DDoSGrid stack for {{ fqdn }}'
 
-     - name: Install git, unzip, pip, python-docker
+     # Dependencies for provisioning
+     - name: Install git, pip, python-docker
        apt:
-         name: git, unzip, python3-pip, python-docker
+         name: git,  python3-pip, python-docker
          state: present
-     - name: Pip install python docker-cokmpose
+     - name: Pip install python docker-compose
        pip:
          name: docker-compose
          executable: pip3
-     - name: Copy sources
-       copy:
-         src: ./housekeeping-ddosgrid-v2.zip
-         dest: /tmp/setup.zip
+
+     # Checking out sources
      - name: Checkout "DDoSDB" from GitHub
        git:
          repo: 'https://github.com/ddosgrid/ddosdb.git'
@@ -48,24 +47,29 @@
          repo: 'https://github.com/ddosgrid/https-reverse-proxy.git'
          dest: /srv/proxy
 
+     # Setup SSL
      - name: Replace SSL certificate
        copy:
          src: ./assets/certificate.cert
          dest: /srv/proxy/cert/certificate.cer
-
      - name: Replace SSL certificate key
        copy:
          src: ./assets/certificate.key
          dest: /srv/proxy/cert/certificate.key
 
+     # Configure domain name
+     - name: Inject FQDN into compose file
+       ansible.builtin.template:
+         src: ./templates/docker-compose-ddosgrid.yml
+         dest: /srv/ddosgrid-v2/docker-compose.yml
+
+     # Start services
      - name: Start proxy service
        community.general.docker_compose:
          project_src: /srv/proxy
-
      - name: Start ddosgrid service
        community.general.docker_compose:
          project_src: /srv/ddosgrid-v2
-
      - name: Start ddosdb service
        community.general.docker_compose:
          project_src: /srv/ddosdb

@@ -25,7 +25,7 @@ Vagrant.configure(2) do |config|
     ansible.extra_vars = {
       ansible_python_interpreter: "/usr/bin/python3",
       # OVERWRITE THIS:
-      fqdn: "testttt.vonderassen.com"
+      fqdn: "test.vonderassen.com"
     }
   end
 end

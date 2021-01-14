@@ -8,6 +8,13 @@ In any case, you will need:
 * SSL certificate in assets folder (certificate.cert, certificate.key)
 * Domain name
 * Host OS that supports one of the options below. We tested on Debian Buster (10).
+* The following two ansible collections are required, install them with sudo if your host requires such priviledge to deploy a VM with port 443:
+  ```bash
+  ansible-galaxy collection install community.general
+  ```
+  ```bash
+  ansible-galaxy collection install geerlingguy.docker
+  ```
 
 a) For a **VM-based** deployment you will also require the following:
 * Vagrant
