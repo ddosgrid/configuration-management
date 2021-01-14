@@ -10,12 +10,7 @@ Vagrant.configure(2) do |config|
   config.vm.network "private_network", ip: "10.0.1.2"
 
   config.vm.define "ddosgrid-v2"
-#  config.vm.network "public_network", ip: "192.168.88.212"
   config.vm.provider :virtualbox do |vb|
-  #   # Don't boot with headless mode
-  #   vb.gui = true
-  #
-  #   # Use VBoxManage to customize the VM. For example to change memory:
     vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2"]
     vb.name = "ddosgrid-v2"
   end
@@ -27,7 +22,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "v"
-    ansible.playbook = "pb.yml"
+    ansible.playbook = "playbook.yml"
     ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
   end
 end

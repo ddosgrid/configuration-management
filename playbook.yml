@@ -1,0 +1,60 @@
+ - name: Playbook to install tools for deployment
+   become: true
+   hosts: all
+   roles:
+    - geerlingguy.docker
+   tasks:
+     - name: Install git, unzip, pip, python-docker
+       apt:
+         name: git, unzip, python3-pip, python-docker
+         state: present
+     - name: Pip install python docker-cokmpose
+       pip:
+         name: docker-compose
+         executable: pip3
+     - name: Copy sources
+       copy:
+         src: ./housekeeping-ddosgrid-v2.zip
+         dest: /tmp/setup.zip
+     - name: Checkout "DDoSDB" from GitHub
+       git:
+         repo: 'https://github.com/ddosgrid/ddosdb.git'
+         dest: /srv/ddosdb
+     - name: Checkout "DDoSGrid" from GitHub
+       git:
+         repo: 'https://github.com/ddosgrid/ddosgrid-v2.git'
+         dest: /srv/ddosgrid-v2
+     - name: Checkout "ddos_dissector" from GitHub into DDoSGrid
+       git:
+         repo: 'https://github.com/ddosgrid/ddos_dissector'
+         dest: /srv/ddosgrid-v2/ddos_dissector
+     - name: Checkout "converters" from GitHub into DDoSGrid
+       git:
+         repo: 'https://github.com/ddosgrid/converters'
+         dest: /srv/ddosgrid-v2/converters
+     - name: Checkout "HTTPS reverse proxy" from GitHub into DDoSGrid
+       git:
+         repo: 'https://github.com/ddosgrid/https-reverse-proxy.git'
+         dest: /srv/proxy
+
+     - name: Replace SSL certificate
+       copy:
+         src: ./assets/certificate.cert
+         dest: /srv/proxy/cert/certificate.cer
+
+     - name: Replace SSL certificate key
+       copy:
+         src: ./assets/certificate.key
+         dest: /srv/proxy/cert/certificate.key
+
+     - name: Start proxy service
+       community.general.docker_compose:
+         project_src: /srv/proxy
+
+     - name: Start ddosgrid service
+       community.general.docker_compose:
+         project_src: /srv/ddosgrid-v2
+
+     - name: Start ddosdb service
+       community.general.docker_compose:
+         project_src: /srv/ddosdb
