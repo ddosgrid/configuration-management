@@ -73,3 +73,13 @@
      - name: Start ddosdb service
        community.general.docker_compose:
          project_src: /srv/ddosdb
+
+     - name: Create super user in DDoSDB
+       shell: |
+         docker exec ddosdb sh -l -c "export DJANGO_SUPERUSER_PASSWORD=$(openssl rand -hex 12); python manage.py createsuperuser --noinput --username test --email test@test.com >/dev/null 2>&1 ; echo $DJANGO_SUPERUSER_PASSWORD"
+       register: createsuperuser
+
+     - name: Print default user
+       ansible.builtin.debug:
+         msg: 'IMPORTANT: User "test" was created with password "{{createsuperuser.stdout}}". We recommend to change it on https://{{ fqdn }}/ddosgrid/ddosdb/'
+     - debug: msg="{{ createsuperuser.stdout }}"
