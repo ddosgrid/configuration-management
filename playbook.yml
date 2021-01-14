@@ -3,7 +3,18 @@
    hosts: all
    roles:
     - geerlingguy.docker
+
+   vars_prompt:
+    - name: fqdn
+      prompt: What is the fully qualified domain name (FQDN)?
+      private: no
+      default: 'test.vonderassen.com'
+
    tasks:
+     - name: Print FQDN
+       ansible.builtin.debug:
+        msg: 'Deploying DDoSGrid stack for {{ fqdn }}'
+
      - name: Install git, unzip, pip, python-docker
        apt:
          name: git, unzip, python3-pip, python-docker

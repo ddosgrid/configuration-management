@@ -12,7 +12,6 @@ Vagrant.configure(2) do |config|
   config.vm.define "ddosgrid-v2"
   config.vm.provider :virtualbox do |vb|
     vb.customize ["modifyvm", :id, "--memory", "4096", "--cpus", "2"]
-    vb.name = "ddosgrid-v2"
   end
 
   # Disable the new default behavior introduced in Vagrant 1.7, to
@@ -23,6 +22,10 @@ Vagrant.configure(2) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.verbose = "v"
     ansible.playbook = "playbook.yml"
-    ansible.extra_vars = { ansible_python_interpreter:"/usr/bin/python3" }
+    ansible.extra_vars = {
+      ansible_python_interpreter: "/usr/bin/python3",
+      # OVERWRITE THIS:
+      fqdn: "testttt.vonderassen.com"
+    }
   end
 end
