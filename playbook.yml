@@ -29,10 +29,12 @@
      - name: Checkout "DDoSDB" from GitHub
        git:
          repo: 'https://github.com/ddosgrid/ddosdb.git'
+         force: yes
          dest: /srv/ddosdb
      - name: Checkout "DDoSGrid" from GitHub
        git:
          repo: 'https://github.com/ddosgrid/ddosgrid-v2.git'
+         force: yes
          dest: /srv/ddosgrid-v2
      - name: Checkout "ddos_dissector" from GitHub into DDoSGrid
        git:
@@ -45,6 +47,7 @@
      - name: Checkout "HTTPS reverse proxy" from GitHub into DDoSGrid
        git:
          repo: 'https://github.com/ddosgrid/https-reverse-proxy.git'
+         force: yes
          dest: /srv/proxy
 
      # Setup SSL
@@ -58,10 +61,14 @@
          dest: /srv/proxy/cert/certificate.key
 
      # Configure domain name
-     - name: Inject FQDN into compose file
+     - name: Render FQDN into compose file
        ansible.builtin.template:
          src: ./templates/docker-compose-ddosgrid.yml
          dest: /srv/ddosgrid-v2/docker-compose.yml
+     - name: Render FQDN into frontend env file
+       ansible.builtin.template:
+         src: ./templates/frontend-env-production
+         dest: /srv/ddosgrid-v2/frontend/.env.production
 
      # Start services
      - name: Start proxy service
@@ -74,12 +81,26 @@
        community.general.docker_compose:
          project_src: /srv/ddosdb
 
+     # Housekeeping
+     - name: Create ElasticSearch index
+       shell: |
+         docker exec ddosdb_housekeeping_1 sh -l -c "sleep 30; /app/ddosdb-docker.db"
+
+     - name: Create PW using OpenSSL
+       shell: openssl rand -hex 12
+       register: pw
+
      - name: Create super user in DDoSDB
        shell: |
-         docker exec ddosdb sh -l -c "export DJANGO_SUPERUSER_PASSWORD=$(openssl rand -hex 12); python manage.py createsuperuser --noinput --username test --email test@test.com >/dev/null 2>&1 ; echo $DJANGO_SUPERUSER_PASSWORD"
+         docker exec ddosdb sh -l -c "DJANGO_SUPERUSER_PASSWORD={{ pw.stdout }} python manage.py createsuperuser --noinput --username test --email test@test.com"
        register: createsuperuser
+       ignore_errors: yes
+
 
      - name: Print default user
        ansible.builtin.debug:
-         msg: 'IMPORTANT: User "test" was created with password "{{createsuperuser.stdout}}". We recommend to change it on https://{{ fqdn }}/ddosgrid/ddosdb/'
-     - debug: msg="{{ createsuperuser.stdout }}"
+         msg: 'IMPORTANT: User "test" was created with password "{{ pw.stdout }}". We recommend to change it on https://{{ fqdn }}/ddosgrid/ddosdb/admin'
+
+     - name: Print next steps
+       ansible.builtin.debug:
+         msg: 'IMPORTANT: Additionally, in the DDoSDB admin panel you need to register the DDoSGrid app and add the secrets to /srv/ddosgrid/docker-compose.yml in the VM'
