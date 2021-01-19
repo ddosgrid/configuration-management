@@ -21,8 +21,8 @@ services:
       - CLIENT_APP_ORIGIN=https://{{fqdn}}/ddosgrid/
       - OAUTH2_AUTHORIZE=https://{{fqdn}}/ddosgrid/ddosdb/o/authorize/
       - OAUTH2_TOKEN=https://{{fqdn}}/ddosgrid/ddosdb/o/token/
-      - OAUTH2_CLIENTID=43smD0Sx40fMGGCTjPsHy0Qb0Xr5d6eBhJV9C3kp
-      - OAUTH2_CLIENTSECRET=Y8yk9mOsmjfP1tvz9zbpjWXQr0uZVauCJMcAT2xIXsdgxOR6RodFcfng4QvRGTXnZJxI9sLU6ARkAXqsrLZAEj0C1iyvmqXwWft7MdFf2jdW3d23UoEPmrnuCwypkV3W
+      - OAUTH2_CLIENTID={{ddosdb_client_id}}
+      - OAUTH2_CLIENTSECRET={{ddosdb_client_secret}}
       - OAUTH2_CALLBACK=https://{{fqdn}}/ddosgrid/api/auth/provider/callback/
       - DDOSDB_PROFILEINFO=https://{{fqdn}}/ddosgrid/ddosdb/api/profileinfo
       - DDOSDB_HOST={{fqdn}}

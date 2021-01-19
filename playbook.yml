@@ -22,7 +22,7 @@
          state: present
      - name: Pip install python docker-compose
        pip:
-         name: docker-compose
+         name: docker-compose, requests
          executable: pip3
 
      # Checking out sources
@@ -60,23 +60,11 @@
          src: ./assets/certificate.key
          dest: /srv/proxy/cert/certificate.key
 
-     # Configure domain name
-     - name: Render FQDN into compose file
-       ansible.builtin.template:
-         src: ./templates/docker-compose-ddosgrid.yml
-         dest: /srv/ddosgrid-v2/docker-compose.yml
-     - name: Render FQDN into frontend env file
-       ansible.builtin.template:
-         src: ./templates/frontend-env-production
-         dest: /srv/ddosgrid-v2/frontend/.env.production
 
      # Start services
      - name: Start proxy service
        community.general.docker_compose:
          project_src: /srv/proxy
-     - name: Start ddosgrid service
-       community.general.docker_compose:
-         project_src: /srv/ddosgrid-v2
      - name: Start ddosdb service
        community.general.docker_compose:
          project_src: /srv/ddosdb
@@ -101,6 +89,44 @@
        ansible.builtin.debug:
          msg: 'IMPORTANT: User "test" was created with password "{{ pw.stdout }}". We recommend to change it on https://{{ fqdn }}/ddosgrid/ddosdb/admin'
 
+
+     # Create OAuth app in DDoSDB
+     - name: Generate 32 random bytes for client ID
+       shell: |
+         openssl rand -hex 32
+       register: rand_xybit_nr
+     - name: Generate 127 random bytes for client secret
+       shell: |
+         openssl rand -hex 127 
+       register: rand_yzbit_nr
+     - name: Pick only stdout and store client ID and secret
+       set_fact:
+         ddosdb_client_id={{ rand_xybit_nr.stdout }}
+         ddosdb_client_secret={{ rand_yzbit_nr.stdout }}
+     - name: Register new OAuth app within DDoSDB
+       ansible.builtin.script: |
+          makeouathapp.py {{ ddosdb_client_id }} {{ ddosdb_client_secret }} \
+          https://{{fqdn}}/ddosgrid/api/auth/provider/callback/ {{fqdn}} test \
+          {{ pw.stdout }}  https://{{fqdn}}/ddosgrid/ddosdb
+       args:
+         executable: python3
+
+
+     # Configure domain name
+     - name: Render FQDN into compose file
+       ansible.builtin.template:
+         src: ./templates/docker-compose-ddosgrid.yml
+         dest: /srv/ddosgrid-v2/docker-compose.yml
+     - name: Render FQDN into frontend env file
+       ansible.builtin.template:
+         src: ./templates/frontend-env-production
+         dest: /srv/ddosgrid-v2/frontend/.env.production
+     
+     # Start service
+     - name: Start ddosgrid service
+       community.general.docker_compose:
+         project_src: /srv/ddosgrid-v2
+
      - name: Print next steps
        ansible.builtin.debug:
-         msg: 'IMPORTANT: Additionally, in the DDoSDB admin panel you need to register the DDoSGrid app and add the secrets to /srv/ddosgrid/docker-compose.yml in the VM'
+         msg: 'IMPORTANT: Additionally, in the DDoSDB admin panel you need to register the DDoSGrid app and add the secrets to /srv/ddosgrid/docker-compose.yml in the VM. Finally, restart that stack to complete the installation'
