@@ -24,12 +24,12 @@ services:
       - OAUTH2_CLIENTID={{ddosdb_client_id}}
       - OAUTH2_CLIENTSECRET={{ddosdb_client_secret}}
       - OAUTH2_CALLBACK=https://{{fqdn}}/ddosgrid/api/auth/provider/callback/
+      - OAUTH2_SUCCESS_FORWARD=https://{{fqdn}}/ddosgrid/
       - DDOSDB_PROFILEINFO=https://{{fqdn}}/ddosgrid/ddosdb/api/profileinfo
       - DDOSDB_HOST={{fqdn}}
       - DDOSDB_PCAPEXPORT=https://{{fqdn}}/ddosgrid/ddosdb/
       - DDOSDB_FILTEREXPORT=https://{{fqdn}}/ddosgrid/ddosdb/api/upload-filter_rules
       - DDOSDB_ATTACKTRACE_PATH=/ddosgrid/ddosdb/api/attack-trace
-      - NODE_TLS_REJECT_UNAUTHORIZED=0
   ddosgridfrontend:
     ports:
       - "3001:80"
