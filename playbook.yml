@@ -17,10 +17,12 @@
 
      # Dependencies for provisioning
      - name: Install git, pip, python-docker
+       no_log: true
        apt:
          name: git,  python3-pip, python-docker
          state: present
      - name: Pip install python docker-compose
+       no_log: true
        pip:
          name: docker-compose, requests
          executable: pip3
@@ -85,9 +87,6 @@
        ignore_errors: yes
 
 
-     - name: Print default user
-       ansible.builtin.debug:
-         msg: 'IMPORTANT: User "test" was created with password "{{ pw.stdout }}". We recommend to change it on https://{{ fqdn }}/ddosgrid/ddosdb/admin'
 
 
      # Create OAuth app in DDoSDB
@@ -129,4 +128,4 @@
 
      - name: Print next steps
        ansible.builtin.debug:
-         msg: 'IMPORTANT: Additionally, in the DDoSDB admin panel you need to register the DDoSGrid app and add the secrets to /srv/ddosgrid/docker-compose.yml in the VM. Finally, restart that stack to complete the installation'
+         msg: 'IMPORTANT: All components have been setup and your user was created. You can login and change the password on https://{{ fqdn }}/ddosgrid/ddosdb/admin  [Username] test [Password] {{ pw.stdout }}'
