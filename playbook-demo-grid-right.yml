@@ -1,0 +1,64 @@
+ - name: Playbook to install tools for deployment
+   become: true
+   hosts: all
+   roles:
+    - geerlingguy.docker
+
+   vars_prompt:
+    - name: fqdn
+      prompt: What is the fully qualified domain name (FQDN)?
+      private: no
+      default: 'test.vonderassen.com'
+
+   tasks:
+     - name: Print FQDN
+       ansible.builtin.debug:
+        msg: 'Deploying DDoSGrid stack for {{ fqdn }}'
+
+     # Dependencies for provisioning
+     - name: Install git, pip, python-docker
+       no_log: true
+       apt:
+         name: git,  python3-pip, python-docker
+         state: present
+     - name: Pip install python docker-compose
+       no_log: true
+       pip:
+         name: docker-compose, requests
+         executable: pip3
+
+     # Checking out sources
+     - name: Checkout "DDoSGrid" from GitHub
+       git:
+         repo: 'https://github.com/jvdassen/ddosgrid-lcn-demo.git'
+         force: yes
+         version: right
+         dest: /srv/ddosgrid-v2
+     - name: Checkout "ddos_dissector" from GitHub into DDoSGrid
+       git:
+         repo: 'https://github.com/ddosgrid/ddos_dissector'
+         dest: /srv/ddosgrid-v2/ddos_dissector
+     - name: Checkout "converters" from GitHub into DDoSGrid
+       git:
+         repo: 'https://github.com/ddosgrid/converters'
+         dest: /srv/ddosgrid-v2/converters
+
+
+     # Configure domain name
+     #     - name: Render FQDN into compose file
+     #  ansible.builtin.template:
+     #    src: ./templates/docker-compose-ddosgrid.yml
+     #    dest: /srv/ddosgrid-v2/docker-compose.yml
+     # - name: Render FQDN into frontend env file
+     #  ansible.builtin.template:
+     #    src: ./templates/frontend-env-production
+     #    dest: /srv/ddosgrid-v2/frontend/.env.production
+     
+     # Start service
+     - name: Start ddosgrid service
+       community.general.docker_compose:
+         project_src: /srv/ddosgrid-v2
+
+     - name: Print next steps
+       ansible.builtin.debug:
+         msg: 'IMPORTANT: All components have been setup and your user was created. You can login and change the password on https://{{ fqdn }}/ddosgrid/ddosdb/admin  [Username] test [Password]'
