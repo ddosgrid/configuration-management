@@ -12,7 +12,7 @@ In any case, you will need:
   ansible-galaxy collection install community.general
   ```
   ```bash
-  ansible-galaxy collection install geerlingguy.docker
+  ansible-galaxy install geerlingguy.docker
   ```
 * Host OS that supports one of the options below. We tested on Debian Buster (10):
 
