@@ -65,11 +65,11 @@
 
      # Start services
      - name: Start proxy service
-       community.general.docker_compose:
-         project_src: /srv/proxy
+       shell: |
+         cd /srv/proxy && docker-compose up -d
      - name: Start ddosdb service
-       community.general.docker_compose:
-         project_src: /srv/ddosdb
+       shell: |
+         cd /srv/ddosdb && docker-compose up -d
 
      # Housekeeping
      - name: Create ElasticSearch index
@@ -123,8 +123,8 @@
      
      # Start service
      - name: Start ddosgrid service
-       community.general.docker_compose:
-         project_src: /srv/ddosgrid-v2
+       shell: |
+         cd /srv/ddosgrid-v2 && docker-compose up -d
 
      - name: Print next steps
        ansible.builtin.debug:
