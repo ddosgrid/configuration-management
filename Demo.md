@@ -21,4 +21,5 @@ cd lcn-demo-playbook
 # Create machines and provision them
 vagrant up
 ```
-
+## Usage
+Just navigate to `http://10.0.1.2:8081/ddosgrid` and `http://10.0.1.3:8081/ddosgrid`.

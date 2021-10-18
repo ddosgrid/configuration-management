@@ -19,10 +19,10 @@
      - name: Install git, pip, python-docker
        no_log: true
        apt:
-         name: git,  python3-pip, python-docker
+         name: git,  python3-pip, python3-docker, libffi-dev
          state: present
      - name: Pip install python docker-compose
-       no_log: true
+       #no_log: true
        pip:
          name: docker-compose, requests
          executable: pip3
